@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEAF·LUX — 곶자왈 광환경 역추적</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Syne:wght@400;500;600&family=Noto+Serif+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f9f7f3;
+  --paper: #fffefa;
+  --ink: #1c1b18;
+  --ink2: #5a5750;
+  --ink3: #b0aca2;
+  --rule: #e2ddd5;
+  --mark: #c8411a;
+  --mark-pale: #fdf3ef;
+  --field: #f3f0ea;
+  --good: #2a5c3f;
+  --good-pale: #edf4f0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  font-family: 'Noto Serif KR', serif;
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+header {
+  padding: 1.75rem 3rem 1.5rem;
+  border-bottom: 2px solid var(--ink);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  background: var(--paper);
+}
+
+.wordmark { display: flex; align-items: baseline; gap: 1.2rem; }
+.wordmark-main { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; letter-spacing: 0.08em; }
+.wordmark-dot { color: var(--mark); }
+.wordmark-sub { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3); padding-bottom: 2px; }
+.header-right { font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); text-align: right; line-height: 2; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  min-height: calc(100vh - 79px);
+}
+
+.left-panel {
+  border-right: 1px solid var(--rule);
+  background: var(--paper);
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.right-panel {
+  background: var(--bg);
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.label {
+  font-family: 'Syne', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.label::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+/* ── 입력 폼 ── */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--rule);
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+  padding: 0;
+}
+.input-row:last-child { border-bottom: none; }
+
+.input-label-wrap {
+  padding: 14px 18px;
+  border-right: 1px solid var(--rule);
+}
+.input-field-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  display: block;
+  margin-bottom: 2px;
+}
+.input-field-desc {
+  font-size: 11px;
+  color: var(--ink2);
+}
+
+.input-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+input[type="number"] {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  width: 110px;
+  padding: 14px 12px 14px 18px;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus { background: var(--field); }
+input[type="number"]::placeholder { color: var(--ink3); font-size: 18px; }
+
+.input-unit {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+  padding: 0 16px 0 4px;
+  min-width: 48px;
+}
+
+/* ── 버튼 ── */
+.btn-calc {
+  width: 100%;
+  padding: 15px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-calc:hover { background: #2e2d28; }
+.btn-calc:active { background: #111; }
+
+.btn-reset {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink3);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.btn-reset:hover { border-color: var(--ink3); color: var(--ink2); }
+
+/* ── 모델 수식 ── */
+.model-block {
+  background: var(--field);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ink3);
+  padding: 16px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--ink2);
+  line-height: 2.2;
+}
+.model-block .val { color: var(--ink); font-weight: 600; }
+.model-block .dim { color: var(--ink3); }
+
+/* ── 오른쪽 플레이스홀더 ── */
+#placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+.placeholder-rule { width: 48px; height: 1px; background: var(--rule); }
+.placeholder-text { font-size: 13px; color: var(--ink3); text-align: center; line-height: 2; }
+
+/* ── 결과 ── */
+.results { display: none; flex-direction: column; gap: 1.75rem; }
+
+/* 조도 히어로 */
+.lux-hero {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 2rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.lux-hero::before {
+  content: 'LUX';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: 120px;
+  color: rgba(255,255,255,0.04);
+  pointer-events: none;
+  letter-spacing: -4px;
+}
+.lux-eyebrow { font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+.lux-number { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 400; line-height: 1; letter-spacing: -0.02em; margin-bottom: 12px; }
+.lux-unit { font-family: 'Syne', sans-serif; font-size: 14px; opacity: 0.5; margin-left: 6px; }
+.env-label { display: inline-block; font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.25); padding: 4px 14px; margin-bottom: 20px; }
+.lux-track { height: 2px; background: rgba(255,255,255,0.12); margin-bottom: 8px; }
+.lux-fill { height: 100%; background: rgba(255,255,255,0.7); transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+.lux-ends { display: flex; justify-content: space-between; font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); }
+
+/* 지표 테이블 */
+.metrics-table { background: var(--paper); border: 1px solid var(--rule); }
+.metric-row { display: grid; grid-template-columns: 1fr auto; padding: 13px 20px; border-bottom: 1px solid var(--rule); align-items: baseline; gap: 1rem; }
+.metric-row:last-child { border-bottom: none; }
+.metric-row.highlight { background: var(--field); }
+.metric-key { font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); }
+.metric-val { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ink); text-align: right; }
+.metric-row.highlight .metric-val { color: var(--good); }
+.metric-unit { font-family: 'Syne', sans-serif; font-size: 10px; color: var(--ink3); margin-left: 4px; }
+
+/* 해석 */
+.interp-box {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--good);
+  padding: 1.25rem 1.75rem;
+}
+.interp-eye { font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
+.interp-text { font-size: 13px; color: var(--ink2); line-height: 2; }
+
+/* csv */
+.csv-box { background: var(--paper); border: 1px solid var(--rule); padding: 14px 20px; }
+.csv-label { font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
+.csv-data { font-family: 'Syne', sans-serif; font-size: 11px; letter-spacing: 0.04em; color: var(--ink2); word-break: break-all; line-height: 1.9; }
+.btn-copy { margin-top: 10px; padding: 6px 14px; background: transparent; border: 1px solid var(--rule); font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); cursor: pointer; transition: border-color .15s, color .15s; }
+.btn-copy:hover { border-color: var(--ink3); color: var(--ink); }
+
+/* 에러 */
+.error-box { background: var(--mark-pale); border: 1px solid #e8b4a0; padding: 14px 18px; font-size: 12px; color: var(--mark); line-height: 1.8; display: none; font-family: 'Syne', sans-serif; letter-spacing: 0.04em; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .left-panel { border-right: none; border-bottom: 1px solid var(--rule); }
+  header { padding: 1.25rem 1.5rem; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .left-panel, .right-panel { padding: 1.75rem 1.5rem; }
+  .lux-number { font-size: 48px; }
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">
+    <span class="wordmark-main">LEAF<span class="wordmark-dot">·</span>LUX</span>
+    <span class="wordmark-sub">곶자왈 잎 형태 기반 광환경 역추적 모델</span>
+  </div>
+  <div class="header-right">
+    log-linear regression<br>
+    R² = 0.971 &nbsp;·&nbsp; n = 8
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- 왼쪽: 입력 -->
+  <div class="left-panel">
+
+    <div>
+      <div class="label">측정값 입력</div>
+      <div class="input-group">
+
+        <div class="input-row">
+          <div class="input-label-wrap">
+            <span class="input-field-label">잎 면적</span>
+            <span class="input-field-desc">ImageJ로 측정한 실제 면적</span>
+          </div>
+          <div class="input-right">
+            <input type="number" id="inp-area" placeholder="0" min="0" step="0.001">
+            <span class="input-unit">mm²</span>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-label-wrap">
+            <span class="input-field-label">잎 길이</span>
+            <span class="input-field-desc">최대 길이 (장축)</span>
+          </div>
+          <div class="input-right">
+            <input type="number" id="inp-len" placeholder="0" min="0" step="0.001">
+            <span class="input-unit">mm</span>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-label-wrap">
+            <span class="input-field-label">잎 폭</span>
+            <span class="input-field-desc">최대 폭 (단축)</span>
+          </div>
+          <div class="input-right">
+            <input type="number" id="inp-width" placeholder="0" min="0" step="0.001">
+            <span class="input-unit">mm</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:10px; padding: 10px 14px; background:var(--field); border:1px solid var(--rule);">
+        <span style="font-family:'Syne',sans-serif;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);">폭/길이 비율</span>
+        <span id="ratio-preview" style="float:right;font-family:'Playfair Display',serif;font-size:18px;color:var(--ink3);">—</span>
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">광도 역추적 계산</button>
+
+    <div class="error-box" id="error-box"></div>
+
+    <button class="btn-reset" id="btn-reset" style="display:none;" onclick="resetForm()">← 다시 입력하기</button>
+
+    <div>
+      <div class="label">역추적 모델 수식</div>
+      <div class="model-block">
+        <span class="dim">// log 선형 회귀 (n=8, R²=0.971)</span><br>
+        ln(광도) = <span class="val">9.632</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="val">0.000057</span> × 면적<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;− <span class="val">0.02217</span> × 길이<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="val">0.0355</span> × 폭/길이 비율<br>
+        <span class="dim">// 길이: 가장 중요한 변수 (표준화 계수 −1.359)</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="label">참고 데이터 (n=8)</div>
+      <table style="width:100%;border-collapse:collapse;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.04em;">
+        <thead>
+          <tr style="background:var(--field);">
+            <th style="padding:8px 10px;text-align:right;color:var(--ink3);font-weight:400;border-bottom:1px solid var(--rule);">광도 (lux)</th>
+            <th style="padding:8px 10px;text-align:right;color:var(--ink3);font-weight:400;border-bottom:1px solid var(--rule);">길이 (mm)</th>
+            <th style="padding:8px 10px;text-align:right;color:var(--ink3);font-weight:400;border-bottom:1px solid var(--rule);">면적 (mm²)</th>
+            <th style="padding:8px 10px;text-align:right;color:var(--ink3);font-weight:400;border-bottom:1px solid var(--rule);">비율</th>
+          </tr>
+        </thead>
+        <tbody id="ref-table"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- 오른쪽: 결과 -->
+  <div class="right-panel">
+
+    <div id="placeholder">
+      <div class="placeholder-rule"></div>
+      <div class="placeholder-text">왼쪽에 측정값을 입력하면<br>광도가 자동으로 역추적됩니다</div>
+      <div class="placeholder-rule"></div>
+    </div>
+
+    <div class="results" id="results">
+
+      <div class="lux-hero">
+        <div class="lux-eyebrow">역추적 광도</div>
+        <div class="lux-number" id="r-lux">—<span class="lux-unit">lux</span></div>
+        <div class="env-label" id="r-env">—</div>
+        <div class="lux-track"><div class="lux-fill" id="r-bar" style="width:0%"></div></div>
+        <div class="lux-ends"><span>190 lux — 저광</span><span>고광 — 12,525 lux</span></div>
+      </div>
+
+      <div>
+        <div class="label">입력된 형태 지표</div>
+        <div class="metrics-table">
+          <div class="metric-row highlight">
+            <div class="metric-key">잎 면적</div>
+            <div class="metric-val" id="r-area">—<span class="metric-unit">mm²</span></div>
+          </div>
+          <div class="metric-row highlight">
+            <div class="metric-key">잎 길이</div>
+            <div class="metric-val" id="r-len">—<span class="metric-unit">mm</span></div>
+          </div>
+          <div class="metric-row highlight">
+            <div class="metric-key">잎 폭</div>
+            <div class="metric-val" id="r-width">—<span class="metric-unit">mm</span></div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-key">폭 / 길이 비율</div>
+            <div class="metric-val" id="r-ratio">—</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-key">ln(광도) 계산값</div>
+            <div class="metric-val" id="r-lnlux">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="interp-box">
+        <div class="interp-eye">광환경 해석</div>
+        <p class="interp-text" id="r-interp">—</p>
+      </div>
+
+      <div class="csv-box">
+        <div class="csv-label">연구 데이터 — CSV 행</div>
+        <div class="csv-data" id="r-csv">—</div>
+        <button class="btn-copy" onclick="copyCSV()">복사</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const B0=9.6322, B1=0.000057, B2=-0.022168, B3=0.0355;
+
+// 참고 데이터
+const refData = [
+  {lux:1023, len:100.225, area:1871.206, width:28.44},
+  {lux:1057, len:110.071, area:1453.419, width:22.625},
+  {lux:2183, len:99.488,  area:2634.063, width:44.149},
+  {lux:3897, len:84.454,  area:929.683,  width:19.863},
+  {lux:12525,len:11.508,  area:201.73,   width:10.722},
+  {lux:6685, len:44.853,  area:354.529,  width:11.288},
+  {lux:399,  len:182.988, area:3852.828, width:33.012},
+  {lux:190,  len:210.523, area:4201.292, width:37.504},
+];
+
+// 참고 데이터 테이블 렌더
+const tbody = document.getElementById('ref-table');
+refData.forEach(d => {
+  const ratio = (d.width/d.len).toFixed(4);
+  const tr = document.createElement('tr');
+  tr.style.borderBottom = '1px solid var(--rule)';
+  tr.innerHTML = `
+    <td style="padding:8px 10px;text-align:right;color:var(--ink);">${d.lux.toLocaleString()}</td>
+    <td style="padding:8px 10px;text-align:right;color:var(--ink2);">${d.len}</td>
+    <td style="padding:8px 10px;text-align:right;color:var(--ink2);">${d.area}</td>
+    <td style="padding:8px 10px;text-align:right;color:var(--ink3);">${ratio}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// 비율 실시간 미리보기
+['inp-len','inp-width'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateRatioPreview);
+});
+function updateRatioPreview(){
+  const len = parseFloat(document.getElementById('inp-len').value);
+  const w   = parseFloat(document.getElementById('inp-width').value);
+  const el  = document.getElementById('ratio-preview');
+  if(len > 0 && w > 0){
+    el.textContent = (w/len).toFixed(4);
+    el.style.color = 'var(--ink)';
+  } else {
+    el.textContent = '—';
+    el.style.color = 'var(--ink3)';
+  }
+}
+
+function calculate(){
+  const area  = parseFloat(document.getElementById('inp-area').value);
+  const len   = parseFloat(document.getElementById('inp-len').value);
+  const width = parseFloat(document.getElementById('inp-width').value);
+  const errBox = document.getElementById('error-box');
+  errBox.style.display='none';
+
+  if(isNaN(area)||isNaN(len)||isNaN(width)||area<=0||len<=0||width<=0){
+    errBox.textContent='세 값을 모두 입력해 주세요. (면적 · 길이 · 폭)';
+    errBox.style.display='block';
+    return;
+  }
+  if(width > len){
+    errBox.textContent='폭이 길이보다 클 수 없습니다. 길이와 폭을 확인해 주세요.';
+    errBox.style.display='block';
+    return;
+  }
+
+  const ratio = width / len;
+  const lnLux = B0 + B1*area + B2*len + B3*ratio;
+  const lux   = Math.round(Math.exp(lnLux));
+  const luxC  = Math.max(100, Math.min(20000, lux));
+
+  let env, interp;
+  if(luxC < 500){
+    env = '저광 — 그늘 환경';
+    interp = `잎의 길이(${len.toFixed(1)}mm)가 길고 면적(${area.toFixed(1)}mm²)이 넓어, 적은 빛을 최대한 흡수하기 위한 음지 적응 전략을 보입니다. 폭/길이 비율(${ratio.toFixed(4)})이 낮아 좁고 긴 잎 형태로 임관 틈새를 통해 내리비치는 직사광을 효율적으로 포착합니다.`;
+  } else if(luxC < 3000){
+    env = '중광 — 반그늘 환경';
+    interp = `잎의 크기(${len.toFixed(1)}mm × ${area.toFixed(1)}mm²)와 비율(${ratio.toFixed(4)})이 중간 수준으로, 반그늘에서 광합성과 증산 사이의 균형을 맞추는 적응을 보입니다. 곶자왈 특유의 이중 임관 구조 아래 자라는 개체에서 흔히 나타나는 형태 특성입니다.`;
+  } else {
+    env = '고광 — 개방 환경';
+    interp = `잎의 길이(${len.toFixed(1)}mm)가 짧고 면적(${area.toFixed(1)}mm²)이 작아, 강한 광에서 과도한 흡수를 줄이고 수분 손실을 최소화하는 양지 적응 전략을 보입니다. 높은 폭/길이 비율(${ratio.toFixed(4)})은 두껍고 납작한 잎 형태로의 수렴 진화를 시사합니다.`;
+  }
+
+  document.getElementById('r-lux').innerHTML=`${luxC.toLocaleString()}<span class="lux-unit">lux</span>`;
+  document.getElementById('r-env').textContent=env;
+  const pct=Math.min(100,Math.round((Math.log(luxC)-Math.log(190))/(Math.log(12525)-Math.log(190))*100));
+  setTimeout(()=>document.getElementById('r-bar').style.width=pct+'%', 50);
+
+  document.getElementById('r-area').innerHTML=`${area.toFixed(3)}<span class="metric-unit">mm²</span>`;
+  document.getElementById('r-len').innerHTML=`${len.toFixed(3)}<span class="metric-unit">mm</span>`;
+  document.getElementById('r-width').innerHTML=`${width.toFixed(3)}<span class="metric-unit">mm</span>`;
+  document.getElementById('r-ratio').textContent=ratio.toFixed(4);
+  document.getElementById('r-lnlux').textContent=lnLux.toFixed(4);
+  document.getElementById('r-interp').textContent=interp;
+
+  const now=new Date();
+  const ts=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('r-csv').textContent=
+    `${ts}, ${area.toFixed(3)}, ${len.toFixed(3)}, ${ratio.toFixed(4)}, ${luxC}, (실측lux입력)`;
+
+  document.getElementById('placeholder').style.display='none';
+  const res=document.getElementById('results');
+  res.style.display='flex';
+  res.style.flexDirection='column';
+  res.style.gap='1.75rem';
+  document.getElementById('btn-reset').style.display='block';
+}
+
+function resetForm(){
+  ['inp-area','inp-len','inp-width'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ratio-preview').textContent='—';
+  document.getElementById('ratio-preview').style.color='var(--ink3)';
+  document.getElementById('results').style.display='none';
+  document.getElementById('placeholder').style.display='flex';
+  document.getElementById('btn-reset').style.display='none';
+  document.getElementById('error-box').style.display='none';
+  document.getElementById('r-bar').style.width='0%';
+}
+
+function copyCSV(){
+  navigator.clipboard.writeText(document.getElementById('r-csv').textContent).then(()=>{
+    const btn=document.querySelector('.btn-copy');
+    btn.textContent='복사됨 ✓';
+    setTimeout(()=>btn.textContent='복사',1500);
+  });
+}
+</script>
+</body>
+</html>
